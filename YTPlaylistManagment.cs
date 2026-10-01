@@ -10,36 +10,36 @@ namespace SongRequestBot;
 
 public class YTPlaylistManagment
 {
-    private UserCredential credential;
     
-    
-    private static YouTubeService youtubeService;
-    public YTPlaylistManagment()
+
+    public static YouTubeService youTubeService()
     {
-        Task.Run(async () => { await GenerateCredentials(); });
+        YouTubeService temp;
+        temp = Task<YouTubeService>.Run(async () => 
+        {
+            UserCredential TMPcredential;
+            YouTubeService serviceTMP;
+            using (FileStream stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
+            {
+                TMPcredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    GoogleClientSecrets.FromStream(stream).Secrets,
+
+                    new[] { YouTubeService.Scope.Youtube },
+                    "useracc",
+                    CancellationToken.None,
+                    new FileDataStore("YoutubePlaylistManager")
+                );
+                serviceTMP = new YouTubeService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = TMPcredential,
+                    ApplicationName = "SongRequestManager"
+                });
+            }
+            return serviceTMP;
+        }).Result;
+        return temp;
     }
 
-    public async Task GenerateCredentials()
-    {
-        using (FileStream stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
-        {
-            credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GoogleClientSecrets.FromStream(stream).Secrets,
-                // This OAuth 2.0 access scope allows for full read/write access to the
-                // authenticated user's account.
-                new[] { YouTubeService.Scope.Youtube },
-                "useracc",
-                CancellationToken.None,
-                new FileDataStore("YoutubePlaylistManager")
-            );
-            youtubeService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SongRequestManager"
-            });
-        }
-    }
-    
     public static async Task<bool> RemoveFromPlaylist(bool bypass=false, string itemID = "fallb")
     {
         try
@@ -55,15 +55,16 @@ public class YTPlaylistManagment
             newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
             try
             {
-                await youtubeService.PlaylistItems.Delete(removeVidID).ExecuteAsync();
+                await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
                 TwitchClientAPI.VidIdList.Remove(removeVidID);
             } catch (Exception ex)
             {
                 removeVidID = TwitchClientAPI.VidIdList.ElementAt(1).ToString();
                 string line = System.Environment.NewLine;
                 try {
-                    await youtubeService.PlaylistItems.Delete(removeVidID).ExecuteAsync();
+                    await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
                     TwitchClientAPI.VidIdList.Remove(removeVidID);
+                    Console.WriteLine(ex.HelpLink);
                 } catch (Exception ex2)
                 {
                     await CountPlaylist();
@@ -84,7 +85,7 @@ public class YTPlaylistManagment
         var nextPageToken = "";
         while (nextPageToken != null)
         {
-            var playlistItemsListRequest = youtubeService.PlaylistItems.List("snippet");
+            var playlistItemsListRequest = youTubeService().PlaylistItems.List("snippet");
             playlistItemsListRequest.PlaylistId = TLIBSecrets.config().ytPlaylist;
             playlistItemsListRequest.MaxResults = 100;
             playlistItemsListRequest.PageToken = nextPageToken;
@@ -94,7 +95,7 @@ public class YTPlaylistManagment
             {
                 try
                 {
-                    await youtubeService.PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
+                    await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
                     itemRemoved++;
                 } 
                 catch (Exception ex)
@@ -116,7 +117,7 @@ public class YTPlaylistManagment
         var nextPageToken = "";
         while (nextPageToken != null)
         {
-            var playlistItemsListRequest = youtubeService.PlaylistItems.List("snippet");
+            var playlistItemsListRequest = youTubeService().PlaylistItems.List("snippet");
             playlistItemsListRequest.PlaylistId = TLIBSecrets.config().ytPlaylist;
             playlistItemsListRequest.MaxResults = 100;
             playlistItemsListRequest.PageToken = nextPageToken;
@@ -131,7 +132,7 @@ public class YTPlaylistManagment
                 {
                     try
                     {
-                        await youtubeService.PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
+                        await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
                     } catch (Exception ex)
                     {
                         string line = System.Environment.NewLine;
@@ -155,7 +156,7 @@ public class YTPlaylistManagment
         newPlaylistItem.Snippet.ResourceId = new ResourceId();
         newPlaylistItem.Snippet.ResourceId.Kind = "youtube#video";
         newPlaylistItem.Snippet.ResourceId.VideoId = VidID;
-        newPlaylistItem = await youtubeService.PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
+        newPlaylistItem = await youTubeService().PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
         string id = newPlaylistItem.Id;
         TwitchClientAPI.VidIdList.Add(id);
     }

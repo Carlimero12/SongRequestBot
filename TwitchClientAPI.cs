@@ -14,7 +14,8 @@ public class TwitchClientAPI
     .AddConsole()
     //.SetMinimumLevel(LogLevel.Trace) // uncomment to view raw messages received from twitch
     ); 
-    private ConnectionCredentials Twcredentials;
+
+    private static ConnectionCredentials Twcredentials;
     public static TwitchClient client;
     static List<string> bannedUsers = ["ronaldontwitch"];
     private static bool songrequests = true;
