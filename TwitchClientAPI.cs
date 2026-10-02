@@ -37,7 +37,7 @@ public class TwitchClientAPI
         client.OnChatCommandReceived += Client_OnChatCommandReceived;
         client.OnJoinedChannel += Client_OnJoinedChannel;
         await client.ConnectAsync();
-        Thread.;
+        Thread.Sleep(Timeout.Infinite);
     }
 
     static async Task Client_OnConnected(object? sender, OnConnectedEventArgs e)
