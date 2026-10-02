@@ -4,7 +4,8 @@ using System.Security.Cryptography.X509Certificates;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
-
+using Google.Apis.YouTube.v3;
+using System.Threading;
 
 namespace SongRequestBot;
 
@@ -14,7 +15,6 @@ public class TwitchClientAPI
     .AddConsole()
     //.SetMinimumLevel(LogLevel.Trace) // uncomment to view raw messages received from twitch
     ); 
-
     private static ConnectionCredentials Twcredentials;
     public static TwitchClient client;
     static List<string> bannedUsers = ["ronaldontwitch"];
@@ -22,20 +22,22 @@ public class TwitchClientAPI
     public static List<string> VidIdList = [];
     public TwitchClientAPI()
     {
-        Task.Run(async () => { 
-            Twcredentials = new ConnectionCredentials(TLIBSecrets.config().username, TLIBSecrets.config().token);
-            client = new TwitchClient(loggerFactory: loggerFactory)
-            {
-                ChatCommandIdentifiers = { "!", "?"},
-            };
-            client.Initialize(Twcredentials);
-            client.OnConnected += Client_OnConnected;
-            client.OnMessageReceived += Client_OnMessageReceived;
-            client.OnChatCommandReceived += Client_OnChatCommandReceived;
-            client.OnJoinedChannel += Client_OnJoinedChannel;
-            await client.ConnectAsync();
-            await Task.Delay(Timeout.Infinite);
-        });
+    }
+
+    public static async void StaticMethod()
+    {
+        Twcredentials = new ConnectionCredentials(TLIBSecrets.config().username, TLIBSecrets.config().token);
+        client = new TwitchClient(loggerFactory: loggerFactory)
+        {
+            ChatCommandIdentifiers = { "!", "?"},
+        };
+        client.Initialize(Twcredentials);
+        client.OnConnected += Client_OnConnected;
+        client.OnMessageReceived += Client_OnMessageReceived;
+        client.OnChatCommandReceived += Client_OnChatCommandReceived;
+        client.OnJoinedChannel += Client_OnJoinedChannel;
+        await client.ConnectAsync();
+        Thread.;
     }
 
     static async Task Client_OnConnected(object? sender, OnConnectedEventArgs e)
