@@ -42,6 +42,10 @@ public class YTPlaylistManagment
 
     public static async Task<bool> RemoveFromPlaylist(bool bypass=false, string itemID = "fallb")
     {
+        if (Program.DevMode)
+        {
+            return false;
+        }
         try
         {
             if (itemID == "fallb")
@@ -82,6 +86,10 @@ public class YTPlaylistManagment
 
     public static async Task ClearPlaylist()
     {
+        if (Program.DevMode)
+        {
+            return;
+        }
         var nextPageToken = "";
         while (nextPageToken != null)
         {
@@ -114,6 +122,10 @@ public class YTPlaylistManagment
 
     public static async Task CountPlaylist()
     {
+        if (Program.DevMode)
+        {
+            return;
+        }
         var nextPageToken = "";
         while (nextPageToken != null)
         {
@@ -150,6 +162,10 @@ public class YTPlaylistManagment
 
     public static async Task AddToPlaylist(string VidID="GNRMeaz6QRI")
     {
+        if (Program.DevMode)
+        {
+            return;
+        }
         var newPlaylistItem = new PlaylistItem();
         newPlaylistItem.Snippet = new PlaylistItemSnippet();
         newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
