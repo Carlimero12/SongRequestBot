@@ -26,10 +26,10 @@ public class TLIBSecrets
     {
         ConfigFile conf = new ConfigFile
         {
-            token = "",
-            username = "",
-            ytPlaylist = "",
-            StreamerName = "",
+            token = "[Your BotAccount token here]",
+            username = "[The name of the botaccount]",
+            ytPlaylist = "[The Id of the YT playlist u want Songs to be transported too]",
+            StreamerName = "[The Streamer name the bot should be serving. All lowercase]",
             maxSongs = 10
         };
         if (!File.Exists(confPath))
@@ -51,7 +51,7 @@ public class TLIBSecrets
             ConfigFile tempconf = JsonSerializer.Deserialize<ConfigFile>(configFileContent);
             if (tempconf == null) 
             { File.Delete(confPath); System.Environment.Exit(1); }
-            else if (tempconf.token == "" || tempconf.username == "" || tempconf.ytPlaylist == "" || tempconf.StreamerName == "")
+            else if (tempconf.token.Contains("[") || tempconf.username.Contains("[") || tempconf.ytPlaylist.Contains("[") || tempconf.StreamerName.Contains("["))
             {
                 System.Environment.Exit(1);
             } 
