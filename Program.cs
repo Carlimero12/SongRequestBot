@@ -1,9 +1,6 @@
 ﻿using System;
 using SongRequestBot;
 using Microsoft.Extensions.Logging;
-using System.Security.Cryptography.X509Certificates;
-using System.IO;
-using System.Reflection;
 using System.Runtime.Loader;
 namespace SongRequestBot
 {
@@ -22,7 +19,6 @@ public class Program()
             return null;
         };
     }
-
     public static ILoggerFactory loggerFactory =  LoggerFactory.Create(c => c
         .AddConsole()
     );

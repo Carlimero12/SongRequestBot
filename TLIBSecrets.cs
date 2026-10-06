@@ -20,7 +20,7 @@ public class ConfigFile()
 
 public class TLIBSecrets
 {
-    static string dirpath = Directory.GetCurrentDirectory();
+    static string dirpath = AppDomain.CurrentDomain.BaseDirectory;
     static string confPath = Path.Combine(dirpath, "config.json");
     public static ConfigFile config()
     {

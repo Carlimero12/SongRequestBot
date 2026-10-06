@@ -139,7 +139,7 @@ public class YTPlaylistManagment
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
               // Print information about each video.
-                counter +=1;
+                /*counter +=1;
                 if (counter >= TLIBSecrets.config().maxSongs)
                 {
                     try
@@ -151,9 +151,9 @@ public class YTPlaylistManagment
                         File.AppendAllText("Errors.txt", "-----------" + line + ex + line);
                     }
                 } else
-                {
+                {*/
                     TwitchClientAPI.VidIdList.Add(playlistItem.Id);
-                }
+                //}
                 Console.WriteLine("{0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
             }
             nextPageToken = playlistItemsListResponse.NextPageToken;

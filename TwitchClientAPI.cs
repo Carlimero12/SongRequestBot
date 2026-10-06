@@ -52,7 +52,6 @@ public class TwitchClientAPI
 
     static async Task Client_OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
-        await YTPlaylistManagment.CountPlaylist();
         Console.WriteLine($"Connected to {e.Channel}");
 
         await client.SendMessageAsync(e.Channel, $"SongRequests 1.0 Started Up");
@@ -61,6 +60,7 @@ public class TwitchClientAPI
         {
             await client.SendMessageAsync(e.Channel, $"Warning DevMode is active. Youtube API calls will not connect. Disable this is used on a non-Dev stream.");
         }
+        await YTPlaylistManagment.CountPlaylist();
     }
     static async Task Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
@@ -85,7 +85,7 @@ public class TwitchClientAPI
         {
             if (lastID.Contains(MATCHID))
             {
-                if (lastID.Count() >= 30)
+                if (lastID.Count() >= 10)
                 {
                     lastID.Clear();
                 }
