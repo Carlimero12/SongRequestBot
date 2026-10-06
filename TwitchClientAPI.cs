@@ -24,6 +24,8 @@ public class TwitchClientAPI
     static List<string> bannedUsers = ["ronaldontwitch"];
     private static bool songrequests = true;
     public static List<string> VidIdList = [];
+    public static bool requestsOnCooldown = false;
+    public static int Cooldown = 2000;
     public TwitchClientAPI()
     {
     }
@@ -81,8 +83,9 @@ public class TwitchClientAPI
         }
         Console.Write($"ResultOfRegex :{MATCHID}\n");
 
-        if (songrequests && MATCHID != "fallb")
+        if (songrequests && MATCHID != "fallb" && !requestsOnCooldown)
         {
+            requestsOnCooldown = true;
             if (lastID.Contains(MATCHID))
             {
                 if (lastID.Count() >= 10)
@@ -108,6 +111,8 @@ public class TwitchClientAPI
                 Console.WriteLine("\nException Caught!");
                 Console.WriteLine("Message :{0} ", ex.Message);
             }
+            Task.Delay(Cooldown);
+            requestsOnCooldown = false;
         } else if (songrequests==false && MATCHID != "fallb")
         {
             await client.SendMessageAsync(e.ChatMessage.Channel, $"Songrequests aren't Open!");
