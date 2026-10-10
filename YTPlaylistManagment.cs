@@ -6,6 +6,7 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 namespace SongRequestBot;
 
 public class YTPlaylistManagment
@@ -25,7 +26,7 @@ public class YTPlaylistManagment
                     GoogleClientSecrets.FromStream(stream).Secrets,
 
                     new[] { YouTubeService.Scope.Youtube },
-                    "useracc",
+                    "user1234",
                     CancellationToken.None,
                     new FileDataStore("YoutubePlaylistManager")
                 );
@@ -99,11 +100,16 @@ public class YTPlaylistManagment
             playlistItemsListRequest.PageToken = nextPageToken;
             var playlistItemsListResponse = await playlistItemsListRequest.ExecuteAsync();
             int itemRemoved = 0;
+            await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, "Clearing the queue. This will take a bit due to API limitations. Requests will be closed till finished");
+            TwitchClientAPI.songrequests = false;
+            Stopwatch timer = new();
+            timer.Start();
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
                 try
                 {
                     await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
+                    TwitchClientAPI.VidIdList.Remove(playlistItem.Id);
                     itemRemoved++;
                 } 
                 catch (Exception ex)
@@ -111,13 +117,18 @@ public class YTPlaylistManagment
                     string line = System.Environment.NewLine;
                     File.AppendAllText("Errors.txt", "-----------" + line + ex + line);
                 }
+                finally
+                {
+                    await Task.Delay(100);
+                }
                 Console.WriteLine("{0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
             }
+            timer.Stop();
+            TwitchClientAPI.songrequests = true;
+            await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Requests Reopened after {timer.ElapsedMilliseconds / 1000}s");
             nextPageToken = playlistItemsListResponse.NextPageToken;
             await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Removed {itemRemoved} from the queue");
         }
-
-        TwitchClientAPI.VidIdList.Clear();
     }
 
     public static async Task CountPlaylist()
@@ -160,13 +171,17 @@ public class YTPlaylistManagment
         }
     }
 
-    public static async Task AddToPlaylist(string VidID="GNRMeaz6QRI")
+    public static async Task<string> AddToPlaylist(string VidID="GNRMeaz6QRI")
     {
         if (Program.DevMode)
         {
-            return;
+            return "InDevMode";
         }
-        var newPlaylistItem = new PlaylistItem();
+        if (Program.QueueEmpty && (TwitchClientAPI.VidIdList.Count > 2))
+        {
+            Program.QueueEmpty = false;
+        }
+        PlaylistItem newPlaylistItem = new PlaylistItem();
         newPlaylistItem.Snippet = new PlaylistItemSnippet();
         newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
         newPlaylistItem.Snippet.ResourceId = new ResourceId();
@@ -175,5 +190,6 @@ public class YTPlaylistManagment
         newPlaylistItem = await youTubeService().PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
         string id = newPlaylistItem.Id;
         TwitchClientAPI.VidIdList.Add(id);
+        return newPlaylistItem.Snippet.Title;
     }
 }

@@ -8,6 +8,7 @@ using Google.Apis.YouTube.v3;
 using System.Threading;
 using System.Text.Json.Nodes;
 using TwitchLib.Api.Core.Extensions.System;
+using Google;
 
 namespace SongRequestBot;
 
@@ -21,11 +22,9 @@ public class TwitchClientAPI
     public static TwitchClient client;
     static List<string> lastID = [];
 
-    static List<string> bannedUsers = ["ronaldontwitch"];
-    private static bool songrequests = true;
+    static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
+    public static bool songrequests = true;
     public static List<string> VidIdList = [];
-    public static bool requestsOnCooldown = false;
-    public static int Cooldown = 2000;
     public TwitchClientAPI()
     {
     }
@@ -38,12 +37,12 @@ public class TwitchClientAPI
             ChatCommandIdentifiers = { "!", "?"},
         };
         client.Initialize(Twcredentials);
-        client.OnConnected += Client_OnConnected;
-        client.OnMessageReceived += Client_OnMessageReceived;
         client.OnChatCommandReceived += Client_OnChatCommandReceived;
+        client.OnConnected += Client_OnConnected;
+        client.OnUserTimedout += Client_OnTimeoutReceived;
+        client.OnMessageReceived += Client_OnMessageReceived;
         client.OnJoinedChannel += Client_OnJoinedChannel;
         await client.ConnectAsync();
-        Thread.Sleep(Timeout.Infinite);
     }
 
     static async Task Client_OnConnected(object? sender, OnConnectedEventArgs e)
@@ -56,36 +55,52 @@ public class TwitchClientAPI
     {
         Console.WriteLine($"Connected to {e.Channel}");
 
-        await client.SendMessageAsync(e.Channel, $"SongRequests 1.0 Started Up");
-        Console.WriteLine($"\nSongRequests 1.0 Started Up");
+        Console.WriteLine($"\nStarted as {e.BotUsername}. Youtube API linked. send Messages containing youtube links for any video and it will be added to the queue. Dont spam.");
         if (Program.DevMode)
         {
             await client.SendMessageAsync(e.Channel, $"Warning DevMode is active. Youtube API calls will not connect. Disable this is used on a non-Dev stream.");
         }
+        else {
+            await client.SendMessageAsync(e.Channel, $"\nSongrequest.");
+        }
         await YTPlaylistManagment.CountPlaylist();
     }
+
+    static async Task Client_OnTimeoutReceived(object? sender, OnUserTimedoutArgs e)
+    {
+        int timeouttime = Int32.Parse(e.UserTimeout.TimeoutDuration.TotalMilliseconds.ToString());
+        Console.WriteLine($"I have been Timeouted on {e.UserTimeout.Channel} for {timeouttime / 1000 }seconds");
+        await Task.Delay(timeouttime + 500);
+        await client.SendMessageAsync(e.UserTimeout.Channel, $"Timeout over; Ready again. DevMode: {Program.DevMode}");
+    }
+
     static async Task Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-
-        string Link = e.ChatMessage.Message;
+        string[] arguments = e.ChatMessage.Message.Split(" ");
         Console.WriteLine($"{e.ChatMessage.Username}#{e.ChatMessage.Channel}: {e.ChatMessage.Message}");
-        if (bannedUsers.Contains(e.ChatMessage.Username) && Link.Contains("youtu") && !Link.Contains("?list"))
+        if (arguments[0].ToLower() != "!sr")
         {
-            await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} You have been banned from song requests!");
             return;
         }
+        string Link = e.ChatMessage.Message;
+
         Regex YoutubeVideoIDRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)", RegexOptions.IgnoreCase);
         Match youtubeMatchID = YoutubeVideoIDRegex.Match(Link);
+
         string MATCHID = youtubeMatchID.Groups[1].Value;
         if (MATCHID.Length != 11)
         {
-            MATCHID = "fallb";
+            await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} Invalid Link");
+            return;
         }
         Console.Write($"ResultOfRegex :{MATCHID}\n");
-
-        if (songrequests && MATCHID != "fallb" && !requestsOnCooldown)
+        if (songrequests)
         {
-            requestsOnCooldown = true;
+            if (bannedUsers.Contains(e.ChatMessage.Username))
+            {
+                await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} You have been banned from song requests!");
+                return;
+            }
             if (lastID.Contains(MATCHID))
             {
                 if (lastID.Count() >= 10)
@@ -99,25 +114,31 @@ public class TwitchClientAPI
             try
             {
                 int IdListLenght = VidIdList.Count;
-                // if (IdListLenght >= TLIBSecrets.config().maxSongs)
-                // {
-                //     await YTPlaylistManagment.RemoveFromPlaylist();
-                // }
-                await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
-                await client.SendMessageAsync(e.ChatMessage.Channel, "Added song to the list!");
+                if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
+                {
+                    await YTPlaylistManagment.RemoveFromPlaylist();
+                }
+                string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
+                Console.WriteLine(name);
+                await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
+            } 
+            catch (GoogleApiException ex)
+            {
+                await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} [Api Error]");
+                Console.WriteLine(ex);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("\nException Caught!");
                 Console.WriteLine("Message :{0} ", ex.Message);
+                await client.SendMessageAsync(e.ChatMessage.Channel, ex.Message);
             }
-            Task.Delay(Cooldown);
-            requestsOnCooldown = false;
-        } else if (songrequests==false && MATCHID != "fallb")
+        } else if (songrequests==false)
         {
             await client.SendMessageAsync(e.ChatMessage.Channel, $"Songrequests aren't Open!");
         } else
         {
+            await client.SendMessageAsync(e.ChatMessage.Channel, $"Something Went Wrong!");
             return;
         }
     }
@@ -129,12 +150,14 @@ public class TwitchClientAPI
 
         switch (command.Name.ToLower())
         {
+             case "sr":
+                 break;
             case "clearqueue":
                 try
                 {
-                    if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator)
+                    if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()) || Program.QueueEmpty || VidIdList.Count() < 2)
                     {
-                        await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} You dont have Permission to do this");
+                        await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} You dont have Permission to do this or the Queue is alr empty");
                         return;
                     }
                     if (command.ArgumentsAsList.Count() == 0)
@@ -144,6 +167,7 @@ public class TwitchClientAPI
                     } else if (command.ArgumentsAsList[0].ToString().ToLower() == "confirm")
                     {
                         await YTPlaylistManagment.ClearPlaylist();
+                        Program.QueueEmpty = true;
                     } else return;
                 } catch (Exception ex)
                 {
@@ -151,14 +175,14 @@ public class TwitchClientAPI
                 }
                 break;
             case "songrequests":
-                if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator)
+                if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()))
                 {
                     await client.SendMessageAsync(channel, "Only Streamer and Mods can toggle SongRequests!");
                     return;
                 }
                 string responseMSG = "Off";
                 if (songrequests) { songrequests = false; responseMSG = "are closed now!"; }
-                else  { songrequests = true; responseMSG = "are open now! Put any link in chat with § in the message and it will be detected"; }
+                else  { songrequests = true; responseMSG = "are open now! Use !sr [youtubeLink] to add to the queue."; }
                 await client.SendMessageAsync(channel, "SongRequests " + responseMSG);
                 break;
             case "help":
@@ -168,7 +192,6 @@ public class TwitchClientAPI
                     if (e.ChatMessage.IsBroadcaster || e.ChatMessage.UserDetail.IsModerator)
                         helpText += ", !songRequests";
                         helpText += ", !clearQueue";
-                        helpText += ", !setCooldown";
 
                     await client.SendMessageAsync(channel, helpText);
                     return;
@@ -181,6 +204,7 @@ public class TwitchClientAPI
                             await client.SendMessageAsync(channel, "You dont have Permission for this Command");
                             return;
                         }
+
                         await client.SendMessageAsync(channel, "The !clearqueue command clears the Youtube Playlist");
                         break;
                     case "songrequests":

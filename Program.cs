@@ -2,8 +2,11 @@
 using SongRequestBot;
 using Microsoft.Extensions.Logging;
 using System.Runtime.Loader;
+using System.Security.Cryptography.X509Certificates;
 namespace SongRequestBot
 {
+
+    // choose a god and start praying this works :3 .
 public class Program()
 {
     static Program()
@@ -19,10 +22,9 @@ public class Program()
             return null;
         };
     }
-    public static ILoggerFactory loggerFactory =  LoggerFactory.Create(c => c
-        .AddConsole()
-    );
     public static bool DevMode = false;
+    public static bool QueueEmpty = false;
+    public static List<string> authUsers = ["carlimero12", "jorgenthehorg"];
     static async Task Main()
     {
         GlobalExceptionHandler errorHandler = new GlobalExceptionHandler();
@@ -31,7 +33,7 @@ public class Program()
         Console.WriteLine("Start");
         Thread StaticCaller = new(new ThreadStart(TwitchClientAPI.StaticMethod));
         StaticCaller.Start();
-        await Task.Delay(Timeout.Infinite);
+        await Task.Delay (Timeout.Infinite);
     }
 }
 }
