@@ -33,6 +33,8 @@ public class Program()
         Console.WriteLine("Start");
         Thread StaticCaller = new(new ThreadStart(TwitchClientAPI.StaticMethod));
         StaticCaller.Start();
+        Thread DiscordStatic = new(new ThreadStart(DiscordClientApi.DiscordClientInitializer));
+        DiscordStatic.Start();
         await Task.Delay (Timeout.Infinite);
     }
 }

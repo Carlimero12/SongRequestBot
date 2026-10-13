@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Apis" Version="1.76.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.76.0.4262" />
+    <PackageReference Include="NetCord" Version="1.0.0-beta.28" />
     <PackageReference Include="TwitchLib" Version="3.5.3" />
     <PackageReference Include="TwitchLib.Client" Version="4.0.1" />
   </ItemGroup>

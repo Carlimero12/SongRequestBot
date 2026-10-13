@@ -20,9 +20,9 @@ public class TwitchClientAPI
     ); 
     private static ConnectionCredentials Twcredentials;
     public static TwitchClient client;
-    static List<string> lastID = [];
+    public static List<string> lastID = [];
 
-    static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
+    public static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
     public static bool songrequests = true;
     public static List<string> VidIdList = [];
     public TwitchClientAPI()
