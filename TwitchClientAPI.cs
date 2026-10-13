@@ -68,6 +68,10 @@ public class TwitchClientAPI
 
     static async Task Client_OnTimeoutReceived(object? sender, OnUserTimedoutArgs e)
     {
+        if (!(e.UserTimeout.Username == TLIBSecrets.config().username))
+        {
+            return;
+        }
         int timeouttime = Int32.Parse(e.UserTimeout.TimeoutDuration.TotalMilliseconds.ToString());
         Console.WriteLine($"I have been Timeouted on {e.UserTimeout.Channel} for {timeouttime / 1000 }seconds");
         await Task.Delay(timeouttime + 500);
@@ -101,7 +105,7 @@ public class TwitchClientAPI
                 await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} You have been banned from song requests!");
                 return;
             }
-            if (lastID.Contains(MATCHID))
+            if (lastID.Contains(MATCHID) && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()))
             {
                 if (lastID.Count() >= 10)
                 {
