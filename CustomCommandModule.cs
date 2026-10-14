@@ -2,6 +2,8 @@ using NetCord;
 using NetCord.Services;
 using NetCord.Services.Commands;
 using NetCord.Services.ApplicationCommands;
+using NetCord.Rest;
+using NetCord.Gateway;
 
 namespace SongRequestBot;
 public enum SongRequestState
