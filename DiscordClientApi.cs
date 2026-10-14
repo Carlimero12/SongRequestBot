@@ -75,7 +75,7 @@ public class DiscordClientApi()
             {
                 TwitchClientAPI.lastID.Clear();
             }
-            return $"<@{user.Id}> Songrequest already requested!";
+            return $"Songrequest already requested!";
         }
         TwitchClientAPI.lastID.Add(MATCHID);
         try
@@ -87,12 +87,12 @@ public class DiscordClientApi()
             }
             string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
             Console.WriteLine(name);
-            return $"<@{user.Id}> Added {name} to queue!";
+            return $"Added {name} to queue!";
         } 
         catch (Exception ex)
         {
             Console.WriteLine("\nException Caught!");
-            return $"<@{user.Id}> Error: " + ex.Message;
+            return $"Error: " + ex.Message;
         }
     }
 }
