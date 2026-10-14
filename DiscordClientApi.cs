@@ -8,7 +8,7 @@ namespace SongRequestBot
 {
 public class DiscordClientApi()
 {
-    public static GatewayClient client = new(new BotToken("MTU1OTU4NjQxNjIwMjIyMzcyNg.GIG2iE.mY4-j1ShcyQWdDNzrHSe4VthGI-XlHo3b9AKx0"), new GatewayClientConfiguration
+    public static GatewayClient client = new(new BotToken(TLIBSecrets.config().discordToken), new GatewayClientConfiguration
     {
         Logger = new ConsoleLogger(),
         Intents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.MessageContent,
