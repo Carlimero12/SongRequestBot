@@ -85,11 +85,11 @@ public class YTPlaylistManagment
         return true;
     }
 
-    public static async Task ClearPlaylist()
+    public static async Task<string> ClearPlaylist(bool isTwitch = true)
     {
         if (Program.DevMode)
         {
-            return;
+            return "fallb";
         }
         var nextPageToken = "";
         while (nextPageToken != null)
@@ -100,7 +100,7 @@ public class YTPlaylistManagment
             playlistItemsListRequest.PageToken = nextPageToken;
             var playlistItemsListResponse = await playlistItemsListRequest.ExecuteAsync();
             int itemRemoved = 0;
-            await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, "Clearing the queue. This will take a bit due to API limitations. Requests will be closed till finished");
+            if (isTwitch) await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, "Clearing the queue. This will take a bit due to API limitations. Requests will be closed till finished");
             TwitchClientAPI.songrequests = false;
             Stopwatch timer = new();
             timer.Start();
@@ -125,10 +125,12 @@ public class YTPlaylistManagment
             }
             timer.Stop();
             TwitchClientAPI.songrequests = true;
-            await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Requests Reopened after {timer.ElapsedMilliseconds / 1000}s");
+            if (isTwitch) await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Requests Reopened after {timer.ElapsedMilliseconds / 1000}s");
             nextPageToken = playlistItemsListResponse.NextPageToken;
-            await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Removed {itemRemoved} from the queue");
+            if (isTwitch) await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"Removed {itemRemoved} from the queue");
+            return $"Removed {itemRemoved} from the queue.\n Time Elapsed: {timer.ElapsedMilliseconds / 1000}s";
         }
+        return "If this message is returned its a error. Contact @<1201127619299655741>";
     }
 
     public static async Task CountPlaylist()

@@ -13,8 +13,11 @@ public class TwitchClientAPI
     .AddConsole()
     //.SetMinimumLevel(LogLevel.Trace) // uncomment to view raw messages received from twitch
     ); 
-    private static ConnectionCredentials Twcredentials;
-    public static TwitchClient client;
+    private static ConnectionCredentials Twcredentials = new ConnectionCredentials(TLIBSecrets.config().username, TLIBSecrets.config().token);
+    public static TwitchClient client = new TwitchClient(loggerFactory: loggerFactory)
+    {
+        ChatCommandIdentifiers = { "!", "?"},
+    };
     public static List<string> lastID = [];
 
     public static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
@@ -26,11 +29,6 @@ public class TwitchClientAPI
 
     public static async void StaticMethod()
     {
-        Twcredentials = new ConnectionCredentials(TLIBSecrets.config().username, TLIBSecrets.config().token);
-        client = new TwitchClient(loggerFactory: loggerFactory)
-        {
-            ChatCommandIdentifiers = { "!", "?"},
-        };
         client.Initialize(Twcredentials);
         client.OnChatCommandReceived += Client_OnChatCommandReceived;
         client.OnConnected += Client_OnConnected;

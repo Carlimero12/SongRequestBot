@@ -27,8 +27,8 @@ public class Program()
         AppDomain.CurrentDomain.UnhandledException += async (s, e) => await errorHandler.TryHandleAsync(null, (Exception)e.ExceptionObject, CancellationToken.None);
         TaskScheduler.UnobservedTaskException += async (s, e) => { await errorHandler.TryHandleAsync(null, e.Exception, CancellationToken.None); e.SetObserved(); };
         Console.WriteLine("Start");
-        Thread StaticCaller = new(new ThreadStart(TwitchClientAPI.StaticMethod));
-        StaticCaller.Start();
+        // Thread StaticCaller = new(new ThreadStart(TwitchClientAPI.StaticMethod));
+        // StaticCaller.Start();
         Thread DiscordStatic = new(new ThreadStart(DiscordClientApi.DiscordClientInitializer));
         DiscordStatic.Start();
         await Task.Delay (Timeout.Infinite);

@@ -16,7 +16,7 @@ public class ConfigFile()
     public required string ytPlaylist { get; set; }
     public required string StreamerName { get; set; }
     public required int maxSongs { get; set; }
-    public required int discordToken { get; set; }
+    public required string discordToken { get; set; }
 }
 
 public class TLIBSecrets
@@ -32,7 +32,7 @@ public class TLIBSecrets
             ytPlaylist = "[The Id of the YT playlist u want Songs to be transported too]",
             StreamerName = "[The Streamer name the bot should be serving. All lowercase]",
             discordToken = "[The discord bots Tokens]",
-            maxSongs = 10
+            maxSongs = -1
         };
         if (!File.Exists(confPath))
         {   
