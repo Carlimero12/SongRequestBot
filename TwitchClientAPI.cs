@@ -1,13 +1,8 @@
 using System;
 using System.Text.RegularExpressions;
-using System.Security.Cryptography.X509Certificates;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
-using Google.Apis.YouTube.v3;
-using System.Threading;
-using System.Text.Json.Nodes;
-using TwitchLib.Api.Core.Extensions.System;
 using Google;
 
 namespace SongRequestBot;

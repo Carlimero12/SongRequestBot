@@ -1,8 +1,4 @@
-﻿using System;
-using SongRequestBot;
-using Microsoft.Extensions.Logging;
-using System.Runtime.Loader;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Runtime.Loader;
 namespace SongRequestBot
 {
 
