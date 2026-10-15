@@ -79,6 +79,11 @@ public class TwitchClientAPI
         {
             return;
         }
+        if (Program.SubVipMode && !e.ChatMessage.UserDetail.IsVip && !e.ChatMessage.UserDetail.IsSubscriber && !e.ChatMessage.UserDetail.IsModerator && !e.ChatMessage.IsBroadcaster)
+        {
+            await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} Sub/Vip mode is active!");
+            return;
+        }
         string Link = e.ChatMessage.Message;
 
         Regex YoutubeVideoIDRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)", RegexOptions.IgnoreCase);
@@ -147,8 +152,17 @@ public class TwitchClientAPI
 
         switch (command.Name.ToLower())
         {
-             case "sr":
-                 break;
+            case "sr":
+                break;
+            case "submode":
+                if (!e.ChatMessage.UserDetail.IsModerator && !e.ChatMessage.IsBroadcaster && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()))
+                {
+                    await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} You dont have Permission to perform this action. See all commands at !help");
+                    return;
+                }
+                Program.SubVipMode = !Program.SubVipMode;
+                await client.SendMessageAsync(channel, $"""@{e.ChatMessage.Username} Toggled SubOnly mode. State of var: {Program.SubVipMode}""");
+                break;
             case "clearqueue":
                 try
                 {
@@ -187,9 +201,11 @@ public class TwitchClientAPI
                 {
                     var helpText = "Available commands: !help [command]";
                     if (e.ChatMessage.IsBroadcaster || e.ChatMessage.UserDetail.IsModerator)
+                    {
                         helpText += ", !songRequests";
                         helpText += ", !clearQueue";
-
+                        helpText += ", !subMode";
+                    }
                     await client.SendMessageAsync(channel, helpText);
                     return;
                 }

@@ -65,6 +65,10 @@ public class DiscordClientApi()
         Regex YoutubeVideoIDRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)", RegexOptions.IgnoreCase);
         Match youtubeMatchID = YoutubeVideoIDRegex.Match(Link);
         string MATCHID = youtubeMatchID.Groups[1].Value;
+        if (Program.SubVipMode)
+        {
+            return $"@{user.Username} Sub/Vip mode is active and only Twitchside requests will be accepted rn!";
+        }
         if (MATCHID.Length != 11)
         {
             return $"<@{user.Id}> Invalid Link";
