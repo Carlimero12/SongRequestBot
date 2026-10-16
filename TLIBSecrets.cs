@@ -2,7 +2,6 @@ namespace SongRequestBot;
 using System;
 using System.Text.Json;
 using System.IO;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
