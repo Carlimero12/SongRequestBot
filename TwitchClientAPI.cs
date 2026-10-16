@@ -6,14 +6,15 @@ using TwitchLib.Client.Models;
 using Google;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
+using Microsoft.Extensions.Logging;
 namespace SongRequestBot;
 
 public class TwitchClientAPI
 {
     private static ILoggerFactory loggerFactory = LoggerFactory.Create(c => c
-    .AddConsole()
-    //.SetMinimumLevel(LogLevel.Trace) // uncomment to view raw messages received from twitch
-    ); 
+        .AddConsole()
+        //.SetMinimumLevel(LogLevel.Trace) // uncomment to view raw messages received from twitch
+    );
     private static ConnectionCredentials Twcredentials = new ConnectionCredentials(TLIBSecrets.config().username, TLIBSecrets.config().token);
     public static TwitchClient client = new TwitchClient(loggerFactory: loggerFactory)
     {
