@@ -21,6 +21,7 @@ public class Program()
     public static bool DevMode = false;
     public static bool SubVipMode = false;
     public static bool QueueEmpty = false;
+    public static List<string> premiumUsers = ["carlimero12"];
     public static List<string> authUsers = ["carlimero12", "jorgenthehorg", "tehvessel"];
     static async Task Main()
     {

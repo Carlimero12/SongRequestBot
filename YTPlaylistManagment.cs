@@ -41,7 +41,7 @@ public class YTPlaylistManagment
         return temp;
     }
 
-    public static async Task<bool> RemoveFromPlaylist(bool bypass=false, string itemID = "fallb")
+    public static async Task<bool> RemoveFromPlaylist(PlaylistItem item, bool bypass=false, string itemID = "fallb")
     {
         if (Program.DevMode)
         {
@@ -49,26 +49,26 @@ public class YTPlaylistManagment
         }
         try
         {
+            string removeVidID = itemID;
             if (itemID == "fallb")
             {
-                TwitchClientAPI.VidIdList.ElementAt(0).ToString();
+                removeVidID = TwitchClientAPI.VidIdList.ElementAt(0).Id.ToString();
             }
             Console.WriteLine("\nTrying to Remove the thingy");
-            string removeVidID = itemID;
             var newPlaylistItem = new PlaylistItem();
             newPlaylistItem.Snippet = new PlaylistItemSnippet();
             newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
             try
             {
                 await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
-                TwitchClientAPI.VidIdList.Remove(removeVidID);
+                TwitchClientAPI.VidIdList.Remove(item);
             } catch (Exception ex)
             {
-                removeVidID = TwitchClientAPI.VidIdList.ElementAt(1).ToString();
+                removeVidID = TwitchClientAPI.VidIdList.ElementAt(0).Id.ToString();
                 string line = System.Environment.NewLine;
                 try {
                     await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
-                    TwitchClientAPI.VidIdList.Remove(removeVidID);
+                    TwitchClientAPI.VidIdList.Remove(item);
                     Console.WriteLine(ex.HelpLink);
                 } catch (Exception ex2)
                 {
@@ -109,7 +109,7 @@ public class YTPlaylistManagment
                 try
                 {
                     await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
-                    TwitchClientAPI.VidIdList.Remove(playlistItem.Id);
+                    TwitchClientAPI.VidIdList.Remove(playlistItem);
                     itemRemoved++;
                 } 
                 catch (Exception ex)
@@ -148,7 +148,7 @@ public class YTPlaylistManagment
             playlistItemsListRequest.PageToken = nextPageToken;
             // Retrieve the list of videos uploaded to the authenticated user's channel.
             var playlistItemsListResponse = await playlistItemsListRequest.ExecuteAsync();
-            int counter = 0;
+            //int counter = 0;
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
               // Print information about each video.
@@ -165,7 +165,7 @@ public class YTPlaylistManagment
                     }
                 } else
                 {*/
-                    TwitchClientAPI.VidIdList.Add(playlistItem.Id);
+                    TwitchClientAPI.VidIdList.Add(playlistItem);
                 //}
                 Console.WriteLine("{0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
             }
@@ -191,7 +191,7 @@ public class YTPlaylistManagment
         newPlaylistItem.Snippet.ResourceId.VideoId = VidID;
         newPlaylistItem = await youTubeService().PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
         string id = newPlaylistItem.Id;
-        TwitchClientAPI.VidIdList.Add(id);
+        TwitchClientAPI.VidIdList.Add(newPlaylistItem);
         return newPlaylistItem.Snippet.Title;
     }
 }

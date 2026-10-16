@@ -4,7 +4,8 @@ using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using Google;
-
+using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
 namespace SongRequestBot;
 
 public class TwitchClientAPI
@@ -22,7 +23,7 @@ public class TwitchClientAPI
 
     public static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
     public static bool songrequests = true;
-    public static List<string> VidIdList = [];
+    public static List<PlaylistItem> VidIdList = [];
     public TwitchClientAPI()
     {
     }
@@ -118,7 +119,7 @@ public class TwitchClientAPI
                 int IdListLenght = VidIdList.Count;
                 if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
                 {
-                    await YTPlaylistManagment.RemoveFromPlaylist();
+                    await YTPlaylistManagment.RemoveFromPlaylist(item: VidIdList.ElementAt(0));
                 }
                 string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
                 Console.WriteLine(name);

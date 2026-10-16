@@ -17,7 +17,7 @@ public class DiscordClientApi()
         Logger = new ConsoleLogger(),
         Intents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.MessageContent | GatewayIntents.Guilds,
     });
-    public static List<ulong> GuildWhitelist = [1294646380714917959, 788018968332861446];
+    public static List<ulong> GuildWhitelist = [1294646380714917959, 788018968332861446, 1447128653262749717];
     static ApplicationCommandService<ApplicationCommandContext> applicationCommandService = new();
 
     public static async void DiscordClientInitializer()
@@ -87,7 +87,7 @@ public class DiscordClientApi()
             int IdListLenght = TwitchClientAPI.VidIdList.Count;
             if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
             {
-                await YTPlaylistManagment.RemoveFromPlaylist();
+                await YTPlaylistManagment.RemoveFromPlaylist(item: TwitchClientAPI.VidIdList.ElementAt(0));
             }
             string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
             Console.WriteLine(name);
