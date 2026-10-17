@@ -22,7 +22,7 @@ public class TwitchClientAPI
     };
     public static List<string> lastID = [];
 
-    public static List<string> bannedUsers = ["ronaldontwitch", "trash_pcplayer"];
+    public static List<string> bannedUsers = [];
     public static bool songrequests = true;
     public static List<PlaylistItem> VidIdList = [];
     public TwitchClientAPI()
@@ -107,7 +107,7 @@ public class TwitchClientAPI
             }
             if (lastID.Contains(MATCHID) && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()))
             {
-                if (lastID.Count() >= 10)
+                if (lastID.Count() >= Program.HowManyOfAKind)
                 {
                     lastID.Clear();
                 }
@@ -154,6 +154,18 @@ public class TwitchClientAPI
 
         switch (command.Name.ToLower())
         {
+            case "srgamba":
+                string name = await YTPlaylistManagment.AddToPlaylist(Program.RandomIds.ElementAt(Random.Shared.Next(0, Program.RandomIds.Count())));
+                await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
+                break;
+            case "shutdown":
+                if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()) || Program.QueueEmpty || VidIdList.Count() < 2)
+                {
+                    return;
+                }
+                await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} ShuttingDown");
+                System.Environment.Exit(123456789);
+                break;
             case "sr":
                 break;
             case "submode":

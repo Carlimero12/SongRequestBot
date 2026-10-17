@@ -1,4 +1,4 @@
-/*
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -38,4 +38,3 @@ public class UserClassesTwitch
         File.WriteAllText(outPath, VidIdJson);
     }
 }
-*/

@@ -75,7 +75,7 @@ public class DiscordClientApi()
         }    
         if (TwitchClientAPI.lastID.Contains(MATCHID) && !Program.authUsers.Contains(user.Username.ToLower()))
         {
-            if (TwitchClientAPI.lastID.Count() >= 10)
+            if (TwitchClientAPI.lastID.Count() >= Program.HowManyOfAKind)
             {
                 TwitchClientAPI.lastID.Clear();
             }
