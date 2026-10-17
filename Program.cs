@@ -1,7 +1,7 @@
 ﻿namespace SongRequestBot
 {
 
-    // choose a god and start praying this works :3 .
+    // choose a god and start praying this works :3 - Carlimero12
     // Erebos, the god of darkness :D - NightTheFox
 public class Program()
 {
