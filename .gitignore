@@ -1,13 +1,3 @@
-/appsettings.Development.json
-/appsettings.json
+# .NET build directories
 /bin
 /obj
-/client_secrets.json
-/-ThePlan-.txt
-/config.json
-/YTPlaylistManagment.cs.txt
-/config_backup.json
-/Errors.txt
-/oldTWITCHAPICODE.txt
-/copy config.json
-/images
