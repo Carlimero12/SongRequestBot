@@ -54,6 +54,10 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
         Contexts = [InteractionContextType.Guild])]
     public string toggleRequests(SongRequestState state = SongRequestState.Check)
     {
+        if (Context == null || Context.Guild == null)
+        {
+            return "Null variable in required context";
+        }
         if (!DiscordClientApi.GuildWhitelist.Contains(Context.Guild.Id))
         {
             return "Unauthorized Server.";
