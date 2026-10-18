@@ -7,6 +7,7 @@ using Google;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
+using NetCord;
 namespace SongRequestBot;
 
 public class TwitchClientAPI
@@ -76,7 +77,6 @@ public class TwitchClientAPI
     static async Task Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
         string[] arguments = e.ChatMessage.Message.Split(" ");
-        Console.WriteLine($"{e.ChatMessage.Username}#{e.ChatMessage.Channel}: {e.ChatMessage.Message}");
         if (arguments[0].ToLower() != "!sr")
         {
             return;
@@ -86,6 +86,7 @@ public class TwitchClientAPI
             await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} Sub/Vip mode is active!");
             return;
         }
+        Console.WriteLine($"{e.ChatMessage.Username}#{e.ChatMessage.Channel}: {e.ChatMessage.Message}");
         string Link = e.ChatMessage.Message;
 
         Regex YoutubeVideoIDRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)", RegexOptions.IgnoreCase);
@@ -125,6 +126,8 @@ public class TwitchClientAPI
                 string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
                 Console.WriteLine(name);
                 await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
+                string LogContext = $"{name} added by {e.ChatMessage.Username} at {DateTime.Now}";
+                File.AppendAllText($"requestlogs.txt", LogContext + System.Environment.NewLine + System.Environment.NewLine);
             } 
             catch (GoogleApiException ex)
             {
