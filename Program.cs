@@ -25,7 +25,7 @@ public class Program()
     {
         Console.WriteLine("Start");
 
-        if (File.Exists("config.json"))
+        if (!File.Exists("config.json"))
         {
             ConfigGenerator.ConfigCLI();
             return;
