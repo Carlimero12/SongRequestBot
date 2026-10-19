@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Principal;
 using System.Transactions;
+using Microsoft.Extensions.Configuration;
 
 public class ConfigFile()
 {
@@ -22,6 +23,17 @@ public class TLIBSecrets
 {
     static string dirpath = AppDomain.CurrentDomain.BaseDirectory;
     static string confPath = Path.Combine(dirpath, "config.json");
+
+    public static void WriteToConfig(ConfigFile conf)
+    {
+        JsonSerializerOptions options = new()
+        {
+            WriteIndented = true
+        };
+        string ConfigJson = JsonSerializer.Serialize(conf, options);
+        File.WriteAllText(confPath, ConfigJson);
+    }
+
     public static ConfigFile config()
     {
         ConfigFile conf = new ConfigFile
@@ -35,16 +47,7 @@ public class TLIBSecrets
         };
         if (!File.Exists(confPath))
         {   
-            JsonSerializerOptions options = new()
-            {
-                WriteIndented = true
-            };
-
-            JsonSerializerOptions optionsCopy = new(options);
-            string ConfigJson = JsonSerializer.Serialize(conf, optionsCopy);
-            File.WriteAllText(confPath, ConfigJson);
-            Console.WriteLine("\nPlease fill out the config file: config.Json first.\nPress any Key to close.");
-            System.Environment.Exit(1);
+            ConfigGenerator.ConfigCLI();
             return conf;
         } else
         {

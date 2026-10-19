@@ -43,24 +43,23 @@ public class DiscordClientApi()
         };
         applicationCommandService.AddModules(typeof(Program).Assembly);
         await applicationCommandService.RegisterCommandsAsync(client.Rest, client.Id);
-        client.GuildCreate += async args => {
-            if (!GuildWhitelist.Contains(args.GuildId) && args.Guild.OwnerId != 610420159739330566)
-            {
-                MessageProperties props = new();
-                props.Content = $"Following Guild has attempted to invite me: {args.Guild.Name}#{args.GuildId}.\nRun /whitelist";
-                await client.Rest.SendMessageAsync(client.Rest.GetDMChannelAsync(1201127619299655741).Result.Id, props);
-                props.Content = $"Your Server {args.Guild.Name} is not Whitelisted!";
-                await client.Rest.SendMessageAsync(client.Rest.GetDMChannelAsync(args.Guild.OwnerId).Result.Id, props);
-                await client.Rest.LeaveGuildAsync(args.GuildId);
-            }
-        };
+        // client.GuildCreate += async args => {
+        //     if (!GuildWhitelist.Contains(args.GuildId) && args.Guild.OwnerId != 610420159739330566)
+        //     {
+        //         MessageProperties props = new();
+        //         props.Content = $"Following Guild has attempted to invite me: {args.Guild.Name}#{args.GuildId}.\nRun /whitelist";
+        //         await client.Rest.SendMessageAsync(client.Rest.GetDMChannelAsync(1201127619299655741).Result.Id, props);
+        //         props.Content = $"Your Server {args.Guild.Name} is not Whitelisted!";
+        //         await client.Rest.SendMessageAsync(client.Rest.GetDMChannelAsync(args.Guild.OwnerId).Result.Id, props);
+        //         await client.Rest.LeaveGuildAsync(args.GuildId);
+        //     }
+        // };
         await client.StartAsync();
 
     } 
 
     public static async Task<string> AddSong_Command(string message, User user, ulong ChannelId)
     {
-        string def =  "fallb";
         string Link = message;
         Regex YoutubeVideoIDRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)", RegexOptions.IgnoreCase);
         Match youtubeMatchID = YoutubeVideoIDRegex.Match(Link);

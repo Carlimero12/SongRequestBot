@@ -1,8 +1,10 @@
 ﻿namespace SongRequestBot
 {
-
+[System.Runtime.Versioning.UnsupportedOSPlatform("android")]
+[System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
     // choose a god and start praying this works :3 - Carlimero12
     // Erebos, the god of darkness :D - NightTheFox
+    // Nephthys, the goddess of death, mourning, and night/darkness :3 -Carlimero12
 public class Program()
 {
     public static bool DevMode = false;
@@ -22,10 +24,23 @@ public class Program()
     static async Task Main()
     {
         Console.WriteLine("Start");
-        Thread StaticCaller = new(new ThreadStart(TwitchClientAPI.StaticMethod));
-        StaticCaller.Start();
-        Thread DiscordStatic = new(new ThreadStart(DiscordClientApi.DiscordClientInitializer));
-        DiscordStatic.Start();
+
+        if (File.Exists("config.json"))
+        {
+            ConfigGenerator.ConfigCLI();
+            return;
+        }         
+
+        if (TLIBSecrets.config().token != "null")
+        {
+            TwitchClientAPI.StaticMethod();
+        }
+
+        if (TLIBSecrets.config().discordToken != "null")
+        {
+            DiscordClientApi.DiscordClientInitializer();
+        }
+            
         await Task.Delay (Timeout.Infinite);
     }
 }
