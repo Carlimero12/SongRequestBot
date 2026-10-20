@@ -36,26 +36,16 @@ public class ConfigGenerator
 
 
         string inputS;
-        if ((inputS = Input("Please enter ur Twitch.tv name here: ")) != "fb")
-        {
-            Configuration.StreamerName = inputS.ToLower();
-        } 
+        inputS = Input("Please enter ur Twitch.tv name here: ");
+        Configuration.StreamerName = inputS.ToLower();
         
-        if ((inputS = Input("Max amount of playlist lenght? (For no limit type -1): ")) != "fb")
+        //Get maxplaylis
+        inputS = Input("Max amount of playlist lenght? (For no limit type -1): ");
+        if(!int.TryParse(inputS, out int result))
         {
-            try
-            {
-                Configuration.maxSongs = Int32.Parse(inputS);
-            }
-            catch (Exception e)
-            {
-                Console.Clear();
-                Console.WriteLine(e.Message);
-                Console.WriteLine("There has been a Error with the Setup. Please restart the Application");
-                Console.ReadLine();
-                Environment.Exit(123);
-            }
+            throw new Exception("Input has to be a number.");
         }
+        Configuration.maxSongs = result;
 
         inputS = Input("Input the Youtube Playlist link: ");
         string Link = inputS;
@@ -68,17 +58,17 @@ public class ConfigGenerator
             Console.ReadLine();
             Environment.Exit(123);
         }
-            Console.WriteLine(youtubeMatchID.Groups[1].Value);
+        Console.WriteLine(youtubeMatchID.Groups[1].Value);
         Configuration.ytPlaylist = youtubeMatchID.Groups[1].Value;
 
         inputS = Input("Enter the exact Username for ur Twitch Bot account.: ");
         Configuration.username = inputS.ToLower();
 
         inputS = Input("Enter the Discord bot Token (name this null to disable Discord side): ");
-        Configuration.discordToken = inputS.ToLower();
+        Configuration.discordToken = inputS;
 
         inputS = Input("Enter the Twitch Bot token (name this null to disable twitch side): ");
-
+        Configuration.token = inputS;
         TLIBSecrets.WriteToConfig(Configuration);
         
         Console.Clear();

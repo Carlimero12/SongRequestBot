@@ -46,41 +46,17 @@ public class YTPlaylistManagment
         {
             return false;
         }
-        try
+        string removeVidID = itemID;
+        if (itemID == "fallb")
         {
-            string removeVidID = itemID;
-            if (itemID == "fallb")
-            {
-                removeVidID = TwitchClientAPI.VidIdList.ElementAt(0).Id.ToString();
-            }
-            Console.WriteLine("\nTrying to Remove the thingy");
-            var newPlaylistItem = new PlaylistItem();
-            newPlaylistItem.Snippet = new PlaylistItemSnippet();
-            newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
-            try
-            {
-                await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
-                TwitchClientAPI.VidIdList.Remove(item);
-            } catch (Exception ex)
-            {
-                removeVidID = TwitchClientAPI.VidIdList.ElementAt(0).Id.ToString();
-                string line = System.Environment.NewLine;
-                try {
-                    await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
-                    TwitchClientAPI.VidIdList.Remove(item);
-                    Console.WriteLine(ex.HelpLink);
-                } catch (Exception ex2)
-                {
-                    await CountPlaylist();
-                    File.AppendAllText("Errors.txt", "-----------" + DateTime.Now.ToString() + line + ex2 + line);
-                    await TwitchClientAPI.client.SendMessageAsync(TLIBSecrets.config().StreamerName, $"There has been an error removing the Songs that are too much. If this messages returns please run '!clearRequests confirm' and restart me after");
-                    return false;
-                }
-            }
-        } catch (IndexOutOfRangeException)
-        {
-            Console.Write("\nItem doesnt exist");
+            removeVidID = TwitchClientAPI.VidIdList.ElementAt(1).Id.ToString();
         }
+        Console.WriteLine("\nTrying to Remove the thingy");
+        var newPlaylistItem = new PlaylistItem();
+        newPlaylistItem.Snippet = new PlaylistItemSnippet();
+        newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
+        await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
+        TwitchClientAPI.VidIdList.Remove(item);
         return true;
     }
 
@@ -105,21 +81,10 @@ public class YTPlaylistManagment
             timer.Start();
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
-                try
-                {
-                    await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
-                    TwitchClientAPI.VidIdList.Remove(playlistItem);
-                    itemRemoved++;
-                } 
-                catch (Exception ex)
-                {
-                    string line = System.Environment.NewLine;
-                    File.AppendAllText("Errors.txt", "-----------" + line + ex + line);
-                }
-                finally
-                {
-                    await Task.Delay(100);
-                }
+                await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
+                TwitchClientAPI.VidIdList.Remove(playlistItem);
+                itemRemoved++;
+                await Task.Delay(100);
                 Console.WriteLine("{0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
             }
             timer.Stop();

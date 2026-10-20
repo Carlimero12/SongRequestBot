@@ -1,13 +1,12 @@
-using System;
 using System.Text.RegularExpressions;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using Google;
-using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
 using NetCord;
+using System.Reflection.Metadata.Ecma335;
 namespace SongRequestBot;
 
 public class TwitchClientAPI
@@ -116,30 +115,16 @@ public class TwitchClientAPI
                 return;
             }
             lastID.Add(MATCHID);
-            try
+            int IdListLenght = VidIdList.Count;
+            if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
             {
-                int IdListLenght = VidIdList.Count;
-                if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
-                {
-                    await YTPlaylistManagment.RemoveFromPlaylist(item: VidIdList.ElementAt(0));
-                }
-                string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
-                Console.WriteLine(name);
-                await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
-                string LogContext = $"{name} added by {e.ChatMessage.Username} at {DateTime.Now}";
-                File.AppendAllText($"requestlogs.txt", LogContext + System.Environment.NewLine + System.Environment.NewLine);
-            } 
-            catch (GoogleApiException ex)
-            {
-                await client.SendMessageAsync(e.ChatMessage.Channel, $"@{e.ChatMessage.Username} [Api Error]");
-                Console.WriteLine(ex);
+                await YTPlaylistManagment.RemoveFromPlaylist(item: VidIdList.ElementAt(0));
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", ex.Message);
-                await client.SendMessageAsync(e.ChatMessage.Channel, ex.Message);
-            }
+            string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
+            Console.WriteLine(name);
+            await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
+            string LogContext = $"{name} added by {e.ChatMessage.Username} at {DateTime.Now}";
+            File.AppendAllText($"requestlogs.txt", LogContext + System.Environment.NewLine + System.Environment.NewLine);
         } else if (songrequests==false)
         {
             await client.SendMessageAsync(e.ChatMessage.Channel, $"Songrequests aren't Open!");
@@ -181,26 +166,20 @@ public class TwitchClientAPI
                 await client.SendMessageAsync(channel, $"""@{e.ChatMessage.Username} Toggled SubOnly mode. State of var: {Program.SubVipMode}""");
                 break;
             case "clearqueue":
-                try
+                if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()) || Program.QueueEmpty || VidIdList.Count() < 2)
                 {
-                    if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()) || Program.QueueEmpty || VidIdList.Count() < 2)
-                    {
-                        await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} You dont have Permission to do this or the Queue is alr empty");
-                        return;
-                    }
-                    if (command.ArgumentsAsList.Count() == 0)
-                    {
-                        await client.SendMessageAsync(channel, $"""@{e.ChatMessage.Username} Type "!clearqueue confirm" to delete all songs in Queue""");
-                        return;
-                    } else if (command.ArgumentsAsList[0].ToString().ToLower() == "confirm")
-                    {
-                        await YTPlaylistManagment.ClearPlaylist();
-                        Program.QueueEmpty = true;
-                    } else return;
-                } catch (Exception ex)
-                {
-                    Console.WriteLine("Error: "+ ex);
+                    await client.SendMessageAsync(channel, $"@{e.ChatMessage.Username} You dont have Permission to do this or the Queue is alr empty");
+                    return;
                 }
+                if (command.ArgumentsAsList.Count() == 0)
+                {
+                    await client.SendMessageAsync(channel, $"""@{e.ChatMessage.Username} Type "!clearqueue confirm" to delete all songs in Queue""");
+                    return;
+                } else if (command.ArgumentsAsList[0].ToString().ToLower() == "confirm")
+                {
+                    await YTPlaylistManagment.ClearPlaylist();
+                    Program.QueueEmpty = true;
+                } else return;
                 break;
             case "songrequests":
                 if (!e.ChatMessage.IsBroadcaster && !e.ChatMessage.UserDetail.IsModerator && !Program.authUsers.Contains(e.ChatMessage.Username.ToLower()))

@@ -25,18 +25,23 @@ public class Program()
     {
         Console.WriteLine("Start");
 
+
+        if (!File.Exists("config_secrets.json"))
+        {
+            throw new Exception("Google API secrets missing. Refer to setup guide");    
+        }
         if (!File.Exists("config.json"))
         {
             ConfigGenerator.ConfigCLI();
             return;
         }         
 
-        if (TLIBSecrets.config().token != "null")
+        if (TLIBSecrets.config().token != "null" && File.Exists("config.json"))
         {
             TwitchClientAPI.StaticMethod();
         }
 
-        if (TLIBSecrets.config().discordToken != "null")
+        if (TLIBSecrets.config().discordToken != "null" && File.Exists("config.json"))
         {
             DiscordClientApi.DiscordClientInitializer();
         }
