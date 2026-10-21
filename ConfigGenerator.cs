@@ -15,11 +15,13 @@ public class ConfigGenerator
         {
             return line;
         }
-        Console.Clear();
-        Console.WriteLine("There has been a Error with the Setup. Please restart the Application");
-        Console.ReadLine();
-        Environment.Exit(123);
-        return "fb";
+        else
+        {
+            Console.Clear();
+            Console.WriteLine("There has been a Error with the Setup. Please restart the Application");
+            Console.ReadLine();
+            throw new Exception("Input cant be null");
+        }
     }
     public static void ConfigCLI()
     {

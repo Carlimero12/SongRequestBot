@@ -20,13 +20,12 @@ public class Program()
         "hHtv2XMZlKs",
         "LACbVhgtx9I",
     ];
-    public static List<string> authUsers = ["carlimero12", "jorgenthehorg", "tehvessel"];
+    public static List<string> authUsers = ["carlimero12", "n1ghtthef0x"];
     static async Task Main()
     {
         Console.WriteLine("Start");
 
-
-        if (!File.Exists("config_secrets.json"))
+        if (!File.Exists("client_secrets.json"))
         {
             throw new Exception("Google API secrets missing. Refer to setup guide");    
         }

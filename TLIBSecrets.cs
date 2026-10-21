@@ -57,7 +57,7 @@ public class TLIBSecrets
             { File.Delete(confPath); System.Environment.Exit(1); }
             else if (tempconf.token.Contains("[") || tempconf.username.Contains("[") || tempconf.ytPlaylist.Contains("[") || tempconf.StreamerName.Contains("[") || tempconf.discordToken.Contains("[") )
             {
-                System.Environment.Exit(1);
+                ConfigGenerator.ConfigCLI();
             } 
             else {
                 conf = tempconf;
