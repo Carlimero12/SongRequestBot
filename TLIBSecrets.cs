@@ -17,6 +17,11 @@ public class ConfigFile()
     public required string StreamerName { get; set; }
     public required int maxSongs { get; set; }
     public required string discordToken { get; set; }
+    public List<string> denyList = [];
+    public int maxSongLenght = -1;
+    public ulong CommandChannel = 1564658081231540274;
+    public int MaxVidLenghtSec = 5*60;
+    public string StartupMSG = "SongRequests";
 }
 
 public class TLIBSecrets

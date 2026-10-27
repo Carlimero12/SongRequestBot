@@ -30,7 +30,6 @@ public class DiscordClientApi()
 
             // Execute the command
             var result = await applicationCommandService.ExecuteAsync(new ApplicationCommandContext(applicationCommandInteraction, client));
-
             if (result is not IFailResult failResult)
                 return;
             try
@@ -81,22 +80,17 @@ public class DiscordClientApi()
             return $"Songrequest already requested!";
         }
         TwitchClientAPI.lastID.Add(MATCHID);
-        try
+        int IdListLenght = TwitchClientAPI.VidIdList.Count;
+        if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
         {
-            int IdListLenght = TwitchClientAPI.VidIdList.Count;
-            if (IdListLenght >= TLIBSecrets.config().maxSongs && TLIBSecrets.config().maxSongs != -1)
-            {
-                await YTPlaylistManagment.RemoveFromPlaylist(item: TwitchClientAPI.VidIdList.ElementAt(0));
-            }
-            string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
-            Console.WriteLine(name);
-            return $"Added {name} to queue!";
-        } 
-        catch (Exception ex)
-        {
-            Console.WriteLine("\nException Caught!");
-            return $"Error: " + ex.Message;
+            await YTPlaylistManagment.RemoveFromPlaylist(item: TwitchClientAPI.VidIdList.ElementAt(0));
         }
+        string name = await YTPlaylistManagment.AddToPlaylist(youtubeMatchID.Groups[1].Value);
+        string LogContext = $"{name} added by {user.Username} at {DateTime.Now}";
+        File.AppendAllText($"requestlogs.txt", LogContext + System.Environment.NewLine + System.Environment.NewLine);
+        Console.WriteLine(name);
+        return $"Added {name} to queue!";
+ 
     }
 }
 }

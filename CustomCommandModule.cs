@@ -17,12 +17,18 @@ public enum SongRequestState
 }
 public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
 {
+
     [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]
     [SlashCommand("addsong", "Adds a song to the Queue!",
         DefaultGuildPermissions = Permissions.SendMessages,
         Contexts = [InteractionContextType.Guild])]
     public string AddSong([SlashCommandParameter(Name = "link", Description = "The Link to the YT Vid")] string @link)
     {
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel)
+        {
+            return "";
+        }
+
         User user = Context.User;
         ulong ChannelId = Context.Channel.Id;
         if (link == null)
@@ -39,6 +45,7 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
         Contexts = [InteractionContextType.Guild])]
     public string ClearQueue([SlashCommandParameter(Name = "confirmation", Description = "Type confirm to confirm the process")] string @confirmation)
     {
+
         if(confirmation.ToLower() != "confirm")
         {
             return "Run the command with confirm to confirm";
@@ -54,6 +61,10 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
         Contexts = [InteractionContextType.Guild])]
     public string toggleRequests(SongRequestState state = SongRequestState.Check)
     {
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel)
+        {
+            return "";
+        }
         if (Context == null || Context.Guild == null)
         {
             return "Null variable in required context";
@@ -93,6 +104,10 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
     [SlashCommand("listsongs", "Gives a list of all current Songs in queue with links to them.", Contexts = [InteractionContextType.Guild])]
     public async Task<string> ListSongs()
     {
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel)
+        {
+            return "";
+        }
         string returnMsg = "If the list is cutoff, this is because of DiscordMessage limit. File summarys for trusted users are Coming soon.";
         string songlist = "";
         foreach(PlaylistItem item in TwitchClientAPI.VidIdList)

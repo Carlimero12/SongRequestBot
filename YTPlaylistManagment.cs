@@ -6,6 +6,7 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Net.Security;
 namespace SongRequestBot;
 
 public class YTPlaylistManagment
@@ -153,6 +154,11 @@ public class YTPlaylistManagment
         newPlaylistItem.Snippet.ResourceId = new ResourceId();
         newPlaylistItem.Snippet.ResourceId.Kind = "youtube#video";
         newPlaylistItem.Snippet.ResourceId.VideoId = VidID;
+        // int.TryParse(newPlaylistItem.ContentDetails.EndAt, out int result);
+        // if ( result > TLIBSecrets.config().MaxVidLenghtSec)
+        // {
+        //     return "Too long of a Song";
+        // }
         newPlaylistItem = await youTubeService().PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
         string id = newPlaylistItem.Id;
         TwitchClientAPI.VidIdList.Add(newPlaylistItem);
