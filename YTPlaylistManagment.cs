@@ -82,11 +82,17 @@ public class YTPlaylistManagment
             timer.Start();
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
-                await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();
+                try {await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();}
+                catch (Exception x)
+                {
+                    Console.WriteLine(x);
+                    await Task.Delay(500);
+                    continue;
+                }
                 TwitchClientAPI.VidIdList.Remove(playlistItem);
                 itemRemoved++;
-                await Task.Delay(100);
-                Console.WriteLine("{0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
+                Console.WriteLine("REMOVING {0} ({1})", playlistItem.Snippet.Title, playlistItem.Snippet.ResourceId.VideoId);
+                await Task.Delay(500);
             }
             timer.Stop();
             TwitchClientAPI.songrequests = true;
