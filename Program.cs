@@ -20,7 +20,7 @@ public class Program()
         "hHtv2XMZlKs",
         "LACbVhgtx9I",
     ];
-    public static List<string> authUsers = ["carlimero12", "n1ghtthef0x"];
+    public static List<string> authUsers = ["carlimero12", "n1ghtthef0x", "jorgenthehorg"];
     static async Task Main()
     {
         Console.WriteLine("Start");
