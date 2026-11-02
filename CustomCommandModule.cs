@@ -6,6 +6,7 @@ using NetCord.Rest;
 using NetCord.Gateway;
 using Google.Apis.YouTube.v3.Data;
 using System.IO;
+using System.Diagnostics;
 
 namespace SongRequestBot;
 public enum SongRequestState
@@ -22,21 +23,33 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
     [SlashCommand("addsong", "Adds a song to the Queue!",
         DefaultGuildPermissions = Permissions.SendMessages,
         Contexts = [InteractionContextType.Guild])]
-    public string AddSong([SlashCommandParameter(Name = "link", Description = "The Link to the YT Vid")] string @link)
+    public async Task AddSong([SlashCommandParameter(Name = "link", Description = "The Link to the YT Vid")] string @link)
     {
-        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel)
+        await Context.Interaction.SendResponseAsync(
+            InteractionCallback.DeferredMessage()
+        );
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode && Context.Guild.Id == 1294646380714917959)
         {
-            return "";
+            await Context.Interaction.ModifyResponseAsync(message => 
+                message.Content = ""
+            );
+            return;
         }
 
         User user = Context.User;
         ulong ChannelId = Context.Channel.Id;
         if (link == null)
         {
-            return "Must include Link";
+            await Context.Interaction.ModifyResponseAsync(message => 
+                message.Content = "The Link Parameter must not be Null"
+            );
+            return;
         }
         Task<string> s = Task.Run(async () => await DiscordClientApi.AddSong_Command(link, user, ChannelId));
-        return s.Result;
+        await Context.Interaction.ModifyResponseAsync(message => 
+            message.Content = s.Result
+        );
+        return;
     }
 
     [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]

@@ -139,7 +139,7 @@ public class TwitchClientAPI
     {
         var channel = e.ChatMessage.Channel;
         var command = e.Command;
-
+        Console.WriteLine($"Catched command: {command}# in {channel}");
         switch (command.Name.ToLower())
         {
             case "srgamba":
