@@ -29,7 +29,9 @@ public class YTPlaylistManagment
                     "user1234",
                     CancellationToken.None,
                     new FileDataStore("YoutubePlaylistManager")
+                    new PromptCodeReceiver()).Result;
                 );
+                Console.WriteLine($"AccessToken: {credential.Token.AccessToken}");
                 serviceTMP = new YouTubeService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = TMPcredential,
