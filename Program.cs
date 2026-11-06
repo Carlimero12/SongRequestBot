@@ -21,7 +21,10 @@ public class Program()
         "LACbVhgtx9I",
     ];
     public static List<string> authUsers = ["carlimero12", "n1ghtthef0x", "jorgenthehorg"];
-    static async Task Main()
+
+        public static string YTProfileName = "user1234"; 
+
+        static async Task Main()
     {
         Console.WriteLine("Start");
 

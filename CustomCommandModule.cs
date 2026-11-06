@@ -28,7 +28,7 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
         await Context.Interaction.SendResponseAsync(
             InteractionCallback.DeferredMessage()
         );
-        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode && Context.Guild.Id == 1294646380714917959)
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode && Context.Guild?.Id == 1294646380714917959)
         {
             await Context.Interaction.ModifyResponseAsync(message => 
                 message.Content = ""

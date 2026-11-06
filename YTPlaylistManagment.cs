@@ -7,40 +7,64 @@ using Google.Apis.YouTube.v3.Data;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
+using TwitchLib.Api.Auth;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 namespace SongRequestBot;
 
 public class YTPlaylistManagment
 {
     
-
     public static YouTubeService youTubeService()
     {
         YouTubeService temp;
-        temp = Task<YouTubeService>.Run(async () => 
+        temp = YoutubeCreds().Result;
+        return temp;
+    }
+
+    private static async Task<YouTubeService> YoutubeCreds()
+    {
+        UserCredential TMPcredential;
+        YouTubeService serviceTMP;
+        using (FileStream stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
         {
-            UserCredential TMPcredential;
-            YouTubeService serviceTMP;
-            using (FileStream stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
+            if(!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/YoutubePlaylistManager.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-{Program.YTProfileName}"))
             {
                 TMPcredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.FromStream(stream).Secrets,
-
                     new[] { YouTubeService.Scope.Youtube },
-                    "user1234",
+                    $"{Program.YTProfileName}",
                     CancellationToken.None,
-                    new FileDataStore("YoutubePlaylistManager")
-                    new PromptCodeReceiver()).Result;
+                    new FileDataStore("YoutubePlaylistManager.json", true),
+                    new LocalServerCodeReceiver()
                 );
-                Console.WriteLine($"AccessToken: {credential.Token.AccessToken}");
-                serviceTMP = new YouTubeService(new BaseClientService.Initializer()
+            } else
+            {
+                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
                 {
-                    HttpClientInitializer = TMPcredential,
-                    ApplicationName = "SongRequestManager"
+                    ClientSecrets = GoogleClientSecrets.FromStream(stream).Secrets,
+                    Scopes = new[] { YouTubeService.Scope.Youtube },
+                    DataStore = new FileDataStore("YoutubePlaylistManager.json", true),
                 });
+                TokenResponse token = await flow.LoadTokenAsync(Program.YTProfileName, CancellationToken.None);
+                if (token == null)
+                {
+                    throw new NullReferenceException("Error authorizing from file.");
+                }
+                TMPcredential = new UserCredential(flow, Program.YTProfileName, token);
+                
             }
-            return serviceTMP;
-        }).Result;
-        return temp;
+
+            serviceTMP = new YouTubeService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = TMPcredential,
+                ApplicationName = "SongRequestManager"
+            });
+        }
+        return serviceTMP;
     }
 
     public static async Task<bool> RemoveFromPlaylist(PlaylistItem item, bool bypass=false, string itemID = "fallb")
