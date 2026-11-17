@@ -1,4 +1,6 @@
-﻿namespace SongRequestBot
+﻿using YoutubeExplode;
+
+namespace SongRequestBot
 {
 [System.Runtime.Versioning.UnsupportedOSPlatform("android")]
 [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
@@ -8,10 +10,12 @@
 public class Program()
 {
     public static bool DevMode = false;
+    public static bool DevMode2 = true;
     public static bool SubVipMode = false;
     public static bool QueueEmpty = false;
     public static List<string> premiumUsers = ["carlimero12"];
     public static int HowManyOfAKind = 100;
+    public static YoutubeClient youtubeEXCLI = new YoutubeClient();
     public static List<string> RandomIds = [
         "7jkFmkucGw0",
         "LMeluRz2wv4",

@@ -7,6 +7,7 @@ using NetCord.Gateway;
 using Google.Apis.YouTube.v3.Data;
 using System.IO;
 using System.Diagnostics;
+using YoutubeExplode.Common;
 
 namespace SongRequestBot;
 public enum SongRequestState
@@ -20,19 +21,17 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
 {
 
     [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]
-    [SlashCommand("addsong", "Adds a song to the Queue!",
+    [SlashCommand("sr", "Adds a song with link to the Queue!",
         DefaultGuildPermissions = Permissions.SendMessages,
         Contexts = [InteractionContextType.Guild])]
-    public async Task AddSong([SlashCommandParameter(Name = "link", Description = "The Link to the YT Vid")] string @link)
+    public async Task SR([SlashCommandParameter(Name = "link", Description = "The Link to the YT Vid")] string @link)
     {
         await Context.Interaction.SendResponseAsync(
             InteractionCallback.DeferredMessage()
         );
         if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode && Context.Guild?.Id == 1294646380714917959)
         {
-            await Context.Interaction.ModifyResponseAsync(message => 
-                message.Content = ""
-            );
+            await Context.Interaction.DeleteResponseAsync();
             return;
         }
 
@@ -53,20 +52,41 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
     }
 
     [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]
-    [SlashCommand("clearqueue", "Clears the Playlist",
-        DefaultGuildPermissions = Permissions.Administrator,
+    [SlashCommand("srname", "Adds a song with Name to the Queue!",
+        DefaultGuildPermissions = Permissions.SendMessages,
         Contexts = [InteractionContextType.Guild])]
-    public string ClearQueue([SlashCommandParameter(Name = "confirmation", Description = "Type confirm to confirm the process")] string @confirmation)
+    public async Task srname([SlashCommandParameter(Name = "songname", Description = "The Name of the YT Vid (maybe with artist name)")] string @link)
     {
-
-        if(confirmation.ToLower() != "confirm")
+        await Context.Interaction.SendResponseAsync(
+            InteractionCallback.DeferredMessage()
+        );
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode && Context.Guild?.Id == 1294646380714917959)
         {
-            return "Run the command with confirm to confirm";
+            await Context.Interaction.DeleteResponseAsync();
+            return;
         }
-        Task<string> s = Task.Run(async () => await YTPlaylistManagment.ClearPlaylist(isTwitch: false));
-        
-        return s.Result;
+
+        User user = Context.User;
+        ulong ChannelId = Context.Channel.Id;
+        if (string.IsNullOrWhiteSpace(link))
+        {
+            await Context.Interaction.ModifyResponseAsync(message => 
+                message.Content = "The Name Parameter must not be Empty"
+            );
+            return;
+        }
+        var results = await Program.youtubeEXCLI.Search.GetVideosAsync(link).CollectAsync(1);
+        var video = results[0];
+        string name1 = await YTPlaylistManagment.AddToPlaylist(video.Id.Value); 
+        Console.WriteLine($"{video.Id.Value} -> {video.Title} # {video.Author}");
+        await Context.Interaction.ModifyResponseAsync(message => 
+            message.Content = $"Added {video.Title} by {video.Author} to queue."
+        );
+        return;
     }
+
+
+
 
     [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]
     [SlashCommand("requeststatus", "Sets the Requests to open or Closed",
@@ -145,5 +165,39 @@ public class ExampleModule : ApplicationCommandModule<ApplicationCommandContext>
         }*/
         await Context.Channel.SendMessageAsync(msg);
         return returnMsg;
+    }
+
+    [RequireContext<ApplicationCommandContext>(RequiredContext.Guild)]
+    [SlashCommand("resetplaylist", "Deletes and recreates the youtubePlaylist linked to yt api!",
+        DefaultGuildPermissions = Permissions.Administrator,
+        Contexts = [InteractionContextType.Guild])]
+    public async Task resetplaylist()
+    {
+        Console.WriteLine(TLIBSecrets.config().ytPlaylist);
+        await Context.Interaction.SendResponseAsync(
+            InteractionCallback.DeferredMessage()
+        );
+        if (Context.Channel.Id != TLIBSecrets.config().CommandChannel && !Program.DevMode2 && Context.Guild?.Id == 1294646380714917959)
+        {
+            await Context.Interaction.DeleteResponseAsync();
+            return;
+        }
+
+        await YTPlaylistManagment.youTubeService.Playlists.Delete(TLIBSecrets.config().ytPlaylist).ExecuteAsync();
+        Playlist newPlaylist = new Playlist();
+        newPlaylist.Snippet = new PlaylistSnippet();
+        newPlaylist.Snippet.Title = $"{TLIBSecrets.config().StreamerName}'s Playlist";
+        newPlaylist.Snippet.Description = $"The Songrequest Playlist for {TLIBSecrets.config().StreamerName}";
+        newPlaylist.Status = new PlaylistStatus();
+        newPlaylist.Status.PrivacyStatus = TLIBSecrets.config().YTPlaylist_PrivacyStatus;
+        newPlaylist = await YTPlaylistManagment.youTubeService.Playlists.Insert(newPlaylist, "snippet,status").ExecuteAsync();
+
+        ConfigFile confs = TLIBSecrets.config();
+        confs.ytPlaylist = newPlaylist.Id;
+        TLIBSecrets.WriteToConfig(conf:confs);
+
+        await Context.Interaction.ModifyResponseAsync(message => 
+            message.Content = $"Successfully reset Playlist. New Playlist at: https://www.youtube.com/playlist?list={newPlaylist.Id}"
+        );
     }
 }

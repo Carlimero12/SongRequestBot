@@ -17,8 +17,10 @@ namespace SongRequestBot;
 
 public class YTPlaylistManagment
 {
+    public static YouTubeService youTubeService = youtServ();
+
     
-    public static YouTubeService youTubeService()
+    public static YouTubeService youtServ()
     {
         YouTubeService temp;
         temp = YoutubeCreds().Result;
@@ -82,7 +84,7 @@ public class YTPlaylistManagment
         var newPlaylistItem = new PlaylistItem();
         newPlaylistItem.Snippet = new PlaylistItemSnippet();
         newPlaylistItem.Snippet.PlaylistId = TLIBSecrets.config().ytPlaylist;
-        await youTubeService().PlaylistItems.Delete(removeVidID).ExecuteAsync();
+        await youTubeService.PlaylistItems.Delete(removeVidID).ExecuteAsync();
         TwitchClientAPI.VidIdList.Remove(item);
         return true;
     }
@@ -96,7 +98,7 @@ public class YTPlaylistManagment
         var nextPageToken = "";
         while (nextPageToken != null)
         {
-            var playlistItemsListRequest = youTubeService().PlaylistItems.List("snippet");
+            var playlistItemsListRequest = youTubeService.PlaylistItems.List("snippet");
             playlistItemsListRequest.PlaylistId = TLIBSecrets.config().ytPlaylist;
             playlistItemsListRequest.MaxResults = 100;
             playlistItemsListRequest.PageToken = nextPageToken;
@@ -108,7 +110,7 @@ public class YTPlaylistManagment
             timer.Start();
             foreach (var playlistItem in playlistItemsListResponse.Items)
             {
-                try {await youTubeService().PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();}
+                try {await youTubeService.PlaylistItems.Delete(playlistItem.Id).ExecuteAsync();}
                 catch (Exception x)
                 {
                     Console.WriteLine(x);
@@ -139,7 +141,7 @@ public class YTPlaylistManagment
         var nextPageToken = "";
         while (nextPageToken != null)
         {
-            var playlistItemsListRequest = youTubeService().PlaylistItems.List("snippet");
+            var playlistItemsListRequest = youTubeService.PlaylistItems.List("snippet");
             playlistItemsListRequest.PlaylistId = TLIBSecrets.config().ytPlaylist;
             playlistItemsListRequest.MaxResults = 100;
             playlistItemsListRequest.PageToken = nextPageToken;
@@ -191,7 +193,7 @@ public class YTPlaylistManagment
         // {
         //     return "Too long of a Song";
         // }
-        newPlaylistItem = await youTubeService().PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
+        newPlaylistItem = await youTubeService.PlaylistItems.Insert(newPlaylistItem, "snippet").ExecuteAsync();
         string id = newPlaylistItem.Id;
         TwitchClientAPI.VidIdList.Add(newPlaylistItem);
         return newPlaylistItem.Snippet.Title;

@@ -7,6 +7,8 @@ using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
 using NetCord;
 using System.Reflection.Metadata.Ecma335;
+using YoutubeExplode;
+using YoutubeExplode.Common;
 namespace SongRequestBot;
 
 public class TwitchClientAPI
@@ -21,7 +23,6 @@ public class TwitchClientAPI
         ChatCommandIdentifiers = { "!", "?"},
     };
     public static List<string> lastID = [];
-
     public static List<string> bannedUsers = [];
     public static bool songrequests = true;
     public static List<PlaylistItem> VidIdList = [];
@@ -56,7 +57,7 @@ public class TwitchClientAPI
             await client.SendMessageAsync(e.Channel, $"Warning DevMode is active. Youtube API calls will not connect. Disable this is used on a non-Dev stream.");
         }
         else {
-            await client.SendMessageAsync(e.Channel, $"\nSongrequest.");
+            await client.SendMessageAsync(e.Channel, TLIBSecrets.config().StartupMSG);
         }
         await YTPlaylistManagment.CountPlaylist();
     }
@@ -142,6 +143,18 @@ public class TwitchClientAPI
         Console.WriteLine($"Catched command: {command}# in {channel}");
         switch (command.Name.ToLower())
         {
+            case "srname":
+                if (string.IsNullOrWhiteSpace(command.ArgumentsAsString))
+                {
+                    await client.SendMessageAsync(e.ChatMessage.Channel, "You have to include the Song search query.");
+                    break;
+                }
+                var results = await Program.youtubeEXCLI.Search.GetVideosAsync(command.ArgumentsAsString).CollectAsync(1);
+                var video = results[0];
+                string name1 = await YTPlaylistManagment.AddToPlaylist(video.Id.Value); 
+                Console.WriteLine($"{video.Id.Value} -> {video.Title} # {video.Author}");
+                await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {video.Title} by {video.Author} to queue.");
+                break;
             case "srgamba":
                 string name = await YTPlaylistManagment.AddToPlaylist(Program.RandomIds.ElementAt(Random.Shared.Next(0, Program.RandomIds.Count())));
                 await client.SendMessageAsync(e.ChatMessage.Channel, $"Added {name} to queue!");
